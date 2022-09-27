@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vxml version="2.1" xml:lang="en-US"
+		xmlns="http://www.w3.org/2001/vxml"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	
+	<!-- Global includes -->
+	<script src="../include/common.js" />
+	<script src="../include/data.js" />
+	<script src="../include/json.js" />
+	<script src="../include/DataAccess.js" />
+
+	<!-- Global declarations -->
+	<script>
+		var State = new Object();
+		State.System = new Object();
+
+		State.APP_LANGUAGE = 'en-US';
+		State.GRAMMARFILEDIR = initSystemTypeVariable('GRAMMARFILEDIR','../Resources/Grammars');
+		State.MSGFILEDIR = initSystemTypeVariable('MSGFILEDIR','../Resources/Prompts');
+		State.SCRIPTSDIR = initSystemTypeVariable('SCRIPTSDIR','../Scripts');
+	</script>
+
+	<!-- Global Scripts -->
+	<script srcexpr="State.MSGFILEDIR + '/Prompts.js'" />
+
+	<!-- Entry -->
+	<form>
+		<block>
+			<goto next="#StartMenu" />
+		</block>
+	</form>
+	
+	<!-- Entry block -->
+	<form id="StartMenu">
+		<block name="Entry">
+			<goto next="#CollectCallerPIN" />
+		</block>
+	</form>
+
+	<!-- This is the Caller PIN Input block -->
+	<form id="CollectCallerPIN">
+		<property name="inputmodes" value="dtmf" />
+		<property name="bargein" value="true" />
+		<grammar srcexpr="State.GRAMMARFILEDIR + '/pin.grxml'" type="application/srgs+xml"/>
+		<block name="CollectCallerPINP0">
+  			<prompt>
+				<audio expr="State.MSGFILEDIR + '/' + State.APP_LANGUAGE + '/' + 'pfs0002.vox'">Here comes some data</audio>
+    		</prompt>
+		</block>
+		<field name="CollectCallerPINField" type="digits?minlength=5;maxlength=5">
+			<property name="interdigittimeout" value="4s"/>
+			<property name="termchar" value="#" /> 
+			<property name="timeout" value="12s"/>
+		</field>
+    	<filled mode="all" namelist="CollectCallerPINField">
+    		<assign name="State.pin" expr="CollectCallerPINField" />
+    		<goto next="#LogHeaders" />
+    	</filled>
+		<catch event="noinput" count="1">
+	  		<throw event="com.dss.solution.toomanynoinputs" message="I am sorry. You have exceeded the number of no input attempts" />
+	  	</catch>
+		<catch event="nomatch" count="5">
+	  		<throw event="com.dss.solution.toomanynomatches" message="I am sorry. You have exceeded the number of no match attempts" />
+	  	</catch>
+	</form>
+
+	<!-- This is the Collect Password Input block -->
+	<form id="CollectCallerPassword">
+		<property name="inputmodes" value="dtmf" />
+		<property name="bargein" value="true" />
+		<block name="CollectCallerPasswordP0">
+  			<prompt>
+				<audio expr="State.MSGFILEDIR + '/' + State.APP_LANGUAGE + '/' + 'pfs0003.vox'"></audio>
+    		</prompt>
+		</block>
+		
+		
+		<field name="CollectCallerPasswordField" type="digits?minlength=4;maxlength=4">
+			<property name="interdigittimeout" value="3s"/>
+			<property name="termchar" value="#" /> 
+			<property name="timeout" value="10s"/>
+		</field>
+    	<filled mode="all" namelist="CollectCallerPasswordField">
+    		<assign name="State.password" expr="CollectCallerPasswordField" />
+    		<goto next="#Verifying" />
+    	</filled>
+		<catch event="noinput" count="3">
+	  		<throw event="com.dss.solution.toomanynoinputs" message="I am sorry. You have exceeded the number of no input attempts" />
+	  	</catch>
+		<catch event="nomatch" count="2">
+	  		<throw event="com.dss.solution.toomanynomatches" message="I am sorry. You have exceeded the number of no match attempts" />
+	  	</catch>
+	</form>
+
+	<!-- This is the Verifying Prompt block -->
+	<form id="Verifying">
+        
+    	<block name="VerifyingP0">
+  			<prompt bargein="true">
+				<audio expr="State.MSGFILEDIR + '/' + State.APP_LANGUAGE + '/' + 'pfs0008.vox'"></audio>
+    		</prompt>
+		</block>
+    	<block>
+    		<goto next="#ExitDocument" />
+    	</block>
+	</form>
+
+	<!-- Basic logging -->
+	<form id="LogHeaders">
+		<block>
+			<log>
+				<value expr="'State: '+State.toSource()"/>
+			</log>
+			<log>
+				<value expr="'SIP Headers: '+session.connection.protocol.sip.headers.toSource()"/>
+			</log>
+			<log>
+				<value expr="'Original DNIS is: '+session.connection.protocol.sip.headers['x-dss-orig']"/>
+			</log>
+    	</block>
+    	<block>
+    		<goto next="#CollectCallerPassword" />
+    	</block>
+	</form>
+
+	<!-- Exit block -->
+	<form id="ExitDocument">
+		<block>
+			<var name="pin" expr="State.pin"/>
+			<var name="password" expr="State.password"/>
+			<exit namelist="pin password"/>
+  		</block>
+	</form>
+</vxml>

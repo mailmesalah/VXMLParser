@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vxml version="2.1" xml:lang="en-US"
+		xmlns="http://www.w3.org/2001/vxml"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<!-- Global includes -->
+	<script src="../include/common.js" />
+	<script src="../include/data.js" />
+	<script src="../include/json.js" />
+	<script src="../include/DataAccess.js" />
+
+	<!-- Global declarations -->
+	<script>
+		var State = new Object();
+		State.System = new Object();
+
+		State.APP_LANGUAGE = 'en-US';
+		State.GRAMMARFILEDIR = initSystemTypeVariable('GRAMMARFILEDIR','../Resources/Grammars');
+		State.MSGFILEDIR = initSystemTypeVariable('MSGFILEDIR','../Resources/Prompts');
+		State.SCRIPTSDIR = initSystemTypeVariable('SCRIPTSDIR','../Scripts');
+	</script>
+
+	<!-- Global Scripts -->
+	<script srcexpr="State.MSGFILEDIR + '/Prompts.js'" />
+
+	<!-- Entry -->
+	<form>
+		<block>
+			<goto next="#StartMenu" />
+		</block>
+	</form>
+	
+	<!-- Entry block -->
+	<form id="StartMenu">
+		<block name="Entry">
+			<goto next="#BronzeOffer" />
+		</block>
+	</form>
+
+	<!-- This is the Exit block -->
+	<form id="ExitDocument">
+		<block>
+			<exit/>
+  		</block>
+	</form>
+
+	<!-- This is the Bronze Prompt block -->
+	<form id="BronzeOffer">
+        
+    	<block name="BronzeOfferP0">
+  			<prompt bargein="true">
+				<audio expr="State.MSGFILEDIR + '/' + State.APP_LANGUAGE + '/' + 'BronzeOffer.vox'"></audio>
+    		</prompt>
+		</block>
+    	<block>
+    		<goto next="#Music" />
+    	</block>
+	</form>
+
+	<!-- This is the Music Prompt block -->
+	<form id="Music">
+        
+    	<block name="MusicP0">
+  			<prompt bargein="true">
+				<audio expr="State.MSGFILEDIR + '/' + State.APP_LANGUAGE + '/' + 'MUSIC.vox'"></audio>
+    		</prompt>
+		</block>
+    	<block>
+    		<goto next="#ExitDocument" />
+    	</block>
+	</form>
+
+</vxml>

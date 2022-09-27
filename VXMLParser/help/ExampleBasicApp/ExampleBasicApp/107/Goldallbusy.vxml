@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vxml version="2.1" xml:lang="en-US"
+		xmlns="http://www.w3.org/2001/vxml"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<!-- Global includes -->
+	<script src="../include/common.js" />
+	<script src="../include/data.js" />
+	<script src="../include/json.js" />
+	<script src="../include/DataAccess.js" />
+
+	<!-- Global declarations -->
+	<script>
+		var State = new Object();
+		State.System = new Object();
+
+		State.APP_LANGUAGE = 'en-US';
+		State.GRAMMARFILEDIR = initSystemTypeVariable('GRAMMARFILEDIR','../Resources/Grammars');
+		State.MSGFILEDIR = initSystemTypeVariable('MSGFILEDIR','../Resources/Prompts');
+		State.SCRIPTSDIR = initSystemTypeVariable('SCRIPTSDIR','../Scripts');
+	</script>
+
+	<!-- Global Scripts -->
+	<script srcexpr="State.MSGFILEDIR + '/Prompts.js'" />
+
+	<!-- Entry -->
+	<form>
+		<block>
+			<goto next="#StartMenu" />
+		</block>
+	</form>
+	
+	<!-- Entry block -->
+	<form id="StartMenu">
+		<block name="Entry">
+			<goto next="#Gold_offer" />
+		</block>
+	</form>
+
+	<!-- This is the Exit block -->
+	<form id="ExitDocument">
+		<block>
+			<exit/>
+  		</block>
+	</form>
+
+	<!-- This is the Gold Prompt block -->
+	<form id="Gold_offer">
+    	<block name="Gold_offerP0">
+  			<prompt bargein="true">
+				<audio expr="State.MSGFILEDIR + '/' + State.APP_LANGUAGE + '/' + 'GoldOffer.vox'"></audio>
+    		</prompt>
+		</block>
+    	<block>
+    		<goto next="#Music" />
+    	</block>
+	</form>
+
+	<!-- This is the Music Prompt block -->
+	<form id="Music">
+    	<block name="MusicP0">
+  			<prompt bargein="true">
+				<audio expr="State.MSGFILEDIR + '/' + State.APP_LANGUAGE + '/' + 'MUSIC.vox'"></audio>
+    		</prompt>
+		</block>
+    	<block>
+    		<goto next="#ActionStartGAB" />
+    	</block>
+	</form>
+
+	<!-- This is the ActionStartBlock block -->
+	<form id="ActionStartGAB">
+		<block>
+			<log>
+				<value expr="'Starting GoldAllBusy Flow'"/>
+			</log>
+    	</block>
+		<block>
+			<log label="com.dss.var.ActionStart">GoldAllBusy|parentID=CollectAccountDetails</log>
+			<goto next="#GoldAllBusyLog" />
+    	</block>
+	</form>
+
+	<!-- This is the ActionEndBlock block -->
+	<form id="ActionEndGAB">
+		<block>
+			<log>
+				<value expr="'Exiting GoldAllBusy Flow'"/>
+			</log>
+    	</block>
+		<block>
+			<log label="com.dss.var.ActionEnd">GoldAllBusy|SUCCESS|Completed Flow</log>
+			<goto next="#ExitDocument" />
+    	</block>
+	</form>
+
+	<!-- This is the SetCallResultBlock block -->
+	<form id="SetCallResult1">
+		<block>
+			<log>
+				<value expr="'SetCallResult_Goldallbusy'"/>
+			</log>
+    	</block>
+		<block>
+			<log label="com.dss.var.CallResult">SUCCESS|<value expr="State.LAST_EVENT_MSG"/></log>
+			<goto next="#SetCallData1" />
+    	</block>
+	</form>
+
+	<!-- This is the SetCallDataBlock block -->
+	<form id="SetCallData1">
+		<block>
+			<log>
+				<value expr="'SetCallData_Goldallbusy'"/>
+			</log>
+    	</block>
+		<block>
+			
+			<var name="SetCallDataVar1" expr="State.DNIS"/>
+			<log label="com.dss.var.CustomVar">SetCallDataVar1|<value expr="SetCallDataVar1"/></log>
+			<goto next="#ActionEndGAB" />
+    	</block>
+	</form>
+
+	<!-- This is the Log block -->
+	<form id="GoldAllBusyLog">
+		<block>
+			<log>
+				<value expr="'Logging from GoldAllBusy'"/>
+			</log>
+    	</block>
+    	<block>
+    		<goto next="#SetCallResult1" />
+    	</block>
+	</form>
+
+</vxml>
